@@ -1,0 +1,11 @@
+os: osx
+osx_image: xcode12
+install:
+  - brew list mint > /dev/null || brew install mint
+  - mint bootstrap
+script:
+  - set -e
+  - mint run yonaskolb/XcodeGen xcodegen generate --project Package --spec Package/Package.yml
+  - xcodebuild -project Package/Package.xcodeproj -scheme App -sdk iphonesimulator clean build
+notifications:
+  email: false

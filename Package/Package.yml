@@ -1,0 +1,17 @@
+name: Package
+packages:
+  QuickTableViewController:
+    url: https://github.com/bcylin/QuickTableViewController
+    revision: 40cfddd8f1c221b3ae572e07d6b7a933af30df63
+targets:
+  App:
+    type: application
+    platform: iOS
+    deploymentTarget: "13.0"
+    sources: Package
+    settings:
+      base:
+        INFOPLIST_FILE: Package/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: "io.github.bcylin.QuickTableViewController.Package"
+    dependencies:
+      - package: QuickTableViewController
