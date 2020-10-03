@@ -1,0 +1,25 @@
+name: CI
+on: [push]
+
+jobs:
+  run-tests:
+    name: Run tests
+    runs-on: macOS-latest
+    env:
+      MINT_PATH: vendor/mint
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Cache ${{ env.MINT_PATH }}
+        uses: actions/cache@v1
+        with:
+          path: ${{ env.MINT_PATH }}
+          key: ${{ runner.os }}-mint-${{ hashFiles('Mintfile') }}
+          restore-keys: |
+            ${{ runner.os }}-mint-
+
+      - run: |
+          brew list mint > /dev/null || brew install mint
+          mint bootstrap
+          mint run yonaskolb/XcodeGen xcodegen generate --project Package --spec Package/Package.yml
+          xcodebuild -project Package/Package.xcodeproj -scheme App -sdk iphonesimulator clean build
