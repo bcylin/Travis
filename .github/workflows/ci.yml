@@ -6,6 +6,8 @@ jobs:
     name: Run tests
     runs-on: macOS-latest
     env:
+      GEMFILE_PATH: Package/Gemfile
+      BUNDLE_PATH: vendor/bundle
       MINT_PATH: vendor/mint
     steps:
       - uses: actions/checkout@master
@@ -18,8 +20,24 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-mint-
 
-      - run: |
+      - name: Cache ${{ env.BUNDLE_PATH }}
+        uses: actions/cache@v1
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('Package/Gemfile.lock') }}
+          restore-keys: ${{ runner.os }}-gems-
+
+      - name: Mint bootstrap
+        run: |
           brew list mint > /dev/null || brew install mint
           mint bootstrap
+
+      - name: Bundle install
+        run: |
+          gem install bundler -v `tail -1 ${{ env.GEMFILE_PATH }}.lock`
+          bundle config path ${{ env.BUNDLE_PATH }}
+          bundle install --gemfile=Package/Gemfile --jobs 4 --retry 3
+
+      - run: |
           mint run yonaskolb/XcodeGen xcodegen generate --project Package --spec Package/Package.yml
-          xcodebuild -project Package/Package.xcodeproj -scheme App -sdk iphonesimulator clean build
+          set -o pipefail && xcodebuild -project Package/Package.xcodeproj -scheme App -sdk iphonesimulator clean build | bundle exec xcpretty
