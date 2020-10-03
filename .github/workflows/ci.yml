@@ -6,7 +6,6 @@ jobs:
     name: Run tests
     runs-on: macOS-latest
     env:
-      GEMFILE_PATH: Package/Gemfile
       BUNDLE_PATH: vendor/bundle
       MINT_PATH: vendor/mint
     steps:
@@ -34,9 +33,9 @@ jobs:
 
       - name: Bundle install
         run: |
-          gem install bundler -v `tail -1 ${{ env.GEMFILE_PATH }}.lock`
+          gem install bundler -v `tail -1 Gemfile.lock`
           bundle config path ${{ env.BUNDLE_PATH }}
-          bundle install --gemfile=Package/Gemfile --jobs 4 --retry 3
+          bundle install --jobs 4 --retry 3
 
       - run: |
           mint run yonaskolb/XcodeGen xcodegen generate --project Package --spec Package/Package.yml
